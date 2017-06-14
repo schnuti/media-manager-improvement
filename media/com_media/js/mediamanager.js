@@ -9831,7 +9831,7 @@ exports.default = Translate;
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.deleteSelectedItems = exports.deleteItem = exports.uploadFile = exports.createDirectory = exports.toggleBrowserItemSelect = exports.getContents = undefined;
+exports.deleteSelectedItems = exports.deleteItem = exports.uploadFile = exports.createDirectory = exports.toggleBrowserItemSelect = undefined;
 
 var _Api = require("../app/Api");
 
@@ -9844,22 +9844,6 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 // Actions are similar to mutations, the difference being that:
 // - Instead of mutating the state, actions commit mutations.
 // - Actions can contain arbitrary asynchronous operations.
-
-/**
- * Get contents of a directory from the api
- * @param commit
- * @param payload
- */
-var getContents = exports.getContents = function getContents(context, payload) {
-    _Api.api.getContents(payload).then(function (contents) {
-        context.commit(types.LOAD_CONTENTS_SUCCESS, contents);
-        context.commit(types.UNSELECT_ALL_BROWSER_ITEMS);
-        context.commit(types.SELECT_DIRECTORY, payload);
-    }).catch(function (error) {
-        // TODO error handling
-        console.log("error", error);
-    });
-};
 
 /**
  * Toggle the selection state of an item
@@ -10178,18 +10162,16 @@ if (options.providers === undefined || options.providers.length === 0) {
 
 // The initial state
 exports.default = {
-    // Will hold the activated filesystem disks
+    // The enabled disks
     disks: options.providers,
-    // The selected disk
+    // The selected disk. Providers are ordered by plugin ordering, so we set the first provider
+    // in the list as the default provider.
     selectedDisk: options.providers[0].name,
-
-    // The selected directory for the active disk
+    // The selected directory of the active disk
     selectedDirectory: '/',
-    // A list of directories loaded by the client
-    directories: [{ path: '/', name: 'PLACEHOLDER', directories: [], files: [], directory: null }],
-    // A list of files
-    files: [],
+    // Whether or not the create folder modal should be shown
     showCreateFolderModal: false,
+    // The currently selected items
     selectedItems: []
 };
 
@@ -10231,43 +10213,16 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 _vue2.default.use(_vuex2.default);
 
-function createDiskModules(disks) {
-    var diskModules = {};
-    var _iteratorNormalCompletion = true;
-    var _didIteratorError = false;
-    var _iteratorError = undefined;
-
-    try {
-        for (var _iterator = disks[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-            var disk = _step.value;
-
-            diskModules[disk.name] = {};
-        }
-    } catch (err) {
-        _didIteratorError = true;
-        _iteratorError = err;
-    } finally {
-        try {
-            if (!_iteratorNormalCompletion && _iterator.return) {
-                _iterator.return();
-            }
-        } finally {
-            if (_didIteratorError) {
-                throw _iteratorError;
-            }
-        }
-    }
-
-    return diskModules;
-}
-
 // A Vuex instance is created by combining the state, mutations, actions, and getters.
 exports.default = new _vuex2.default.Store({
     state: _state2.default,
     getters: getters,
     actions: actions,
     mutations: _mutations2.default,
-    modules: createDiskModules(_state2.default.disks),
+    modules: _state2.default.disks.reduce(function (modules, current) {
+        modules[current.name] = {};
+        return modules;
+    }, {}),
     strict: process.env.NODE_ENV !== 'production'
 });
 

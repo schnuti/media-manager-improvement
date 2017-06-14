@@ -6,11 +6,12 @@ if (options.providers === undefined || options.providers.length === 0) {
 
 // The initial state
 export default {
-    // Will hold the activated filesystem disks
+    // The enabled disks
     disks: options.providers,
-    // The selected disk
-    selectedDisk: options.providers[0].name, // TODO check for existence
-    // The selected directory for the active disk
+    // The selected disk. Providers are ordered by plugin ordering, so we set the first provider
+    // in the list as the default provider.
+    selectedDisk: options.providers[0].name,
+    // The selected directory of the active disk
     selectedDirectory: '/',
     // Whether or not the create folder modal should be shown
     showCreateFolderModal: false,

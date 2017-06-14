@@ -7,20 +7,15 @@ import mutations from "./mutations";
 
 Vue.use(Vuex);
 
-function createDiskModules(disks) {
-    const diskModules = {};
-    for (const disk of disks) {
-        diskModules[disk.name] = {}
-    }
-    return diskModules;
-}
-
 // A Vuex instance is created by combining the state, mutations, actions, and getters.
 export default new Vuex.Store({
     state,
     getters,
     actions,
     mutations,
-    modules: createDiskModules(state.disks),
+    modules: state.disks.reduce((modules, current) => {
+        modules[current.name] = {}
+        return modules;
+    }, {}),
     strict: process.env.NODE_ENV !== 'production'
 })
